@@ -1,6 +1,7 @@
 # Movie-Rec-Chatbot
 Chatbot providing personal movie recommendations through a mix of semantic-similarity search and traditional filtering.
 
+available on Huggingface Space[link](https://huggingface.co/spaces/qinxuqiang1990/movie_rec_chatbot)
 # Movie Recommendation Chatbot - Design Document
 
 ## 1. Executive Summary
