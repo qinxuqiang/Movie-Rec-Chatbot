@@ -100,7 +100,7 @@ class MovieChatState:
     "genres_cleaned": List[str],
     "cast": List[str],
     "directors": List[str],
-    "keywords_cleaned": List[str],
+    "keywords": List[str],
     "imdb_rating": float,
     "overview": str
 }
@@ -329,19 +329,19 @@ def fuzzy_name_search(
 
 ## 10. Future Enhancements
 
-### 10.1 Planned Features
+### 10.1 Planned Features (future)
 - **Multi-language Support**: International movie databases
 - **User Profiles**: Persistent preference learning
 - **Social Features**: Movie sharing and ratings
 - **Advanced Filtering**: More granular search options
 
-### 10.2 Technical Improvements
+### 10.2 Technical Improvements (future)
 - **Streaming Responses**: Real-time response generation
 - **Better Embeddings**: Domain-specific movie embeddings
 - **Caching Layer**: Redis for production caching
 - **API Endpoints**: RESTful API for external integration
 
-### 10.3 UI/UX Enhancements
+### 10.3 UI/UX Enhancements (future)
 - **Mobile App**: Native mobile interface
 - **Voice Interface**: Speech-to-text integration
 - **Rich Media**: Movie trailers and images
@@ -355,4 +355,3 @@ The system successfully combines semantic search capabilities with traditional f
 
 ---
 
-*This design document serves as a comprehensive guide for understanding, maintaining, and extending the ReelTalk movie recommendation chatbot system.*
