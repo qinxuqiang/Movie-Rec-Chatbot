@@ -1,0 +1,7 @@
+faiss-cpu
+langchain_community
+langchain_huggingface
+rapidfuzz
+sentence_transformers
+python-dotenv
+openai
