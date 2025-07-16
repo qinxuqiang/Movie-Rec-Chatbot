@@ -1,5 +1,5 @@
 # Movie-Rec-Chatbot
-Chatbot providing personal movie recommendations
+Chatbot providing personal movie recommendations through a mix of semantic-similarity search and traditional filtering.
 
 # Movie Recommendation Chatbot - Design Document
 
