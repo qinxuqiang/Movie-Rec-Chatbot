@@ -1,14 +1,14 @@
 # Movie-Rec-Chatbot
 Chatbot providing personal movie recommendations through a mix of semantic-similarity search and traditional filtering.
 
-available on Huggingface Space [LINK](https://huggingface.co/spaces/qinxuqiang1990/movie_rec_chatbot).
+available on Huggingface Space [Link](https://huggingface.co/spaces/qinxuqiang1990/movie_rec_chatbot).
 # Movie Recommendation Chatbot - Design Document
 
 ## 1. Executive Summary
 
 **Project Name:** ReelTalk - AI-Powered Movie Recommendation Chatbot  
 **Version:** 1.0  
-**Date:** July 2025  
+**Date:** June 2025  
 **Purpose:** An intelligent conversational system that provides personalized movie recommendations through natural language interactions.
 
 ### Key Features
