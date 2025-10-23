@@ -5,3 +5,6 @@ rapidfuzz
 sentence_transformers
 python-dotenv
 openai
+flask
+flask-cors
+gunicorn
