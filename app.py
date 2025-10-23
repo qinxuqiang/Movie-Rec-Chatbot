@@ -12,6 +12,10 @@ import torch
 import os
 import ast
 import re
+from flask import Flask, request, jsonify
+from flask_cors import Cors
+
+RUN_FLASK = os.getenv("RUN_FLASK", "0") == "1"  # set RUN_FLASK=1 to use Flask instead of Gradio
 
 from dotenv import load_dotenv
 load_dotenv()
@@ -630,6 +634,25 @@ class MovieChatState:
     recommended_movies: List[Dict[str, Any]] = field(default_factory=list)
     conversation_stage: str = "greeting"
     last_action: str = ""
+def state_from_dict(d: dict | None) -> MovieChatState:
+    if not d:
+        return MovieChatState()
+    s = MovieChatState()
+    s.messages = d.get("messages", [])
+    s.user_preferences = d.get("user_preferences", {})
+    s.recommended_movies = d.get("recommended_movies", [])
+    s.conversation_stage = d.get("conversation_stage", "greeting")
+    s.last_action = d.get("last_action", "")
+    return s
+
+def state_to_dict(s: MovieChatState) -> dict:
+    return {
+        "messages": s.messages,
+        "user_preferences": s.user_preferences,
+        "recommended_movies": s.recommended_movies,
+        "conversation_stage": s.conversation_stage,
+        "last_action": s.last_action,
+    }
 
 class MovieRecommendationAgent:
     def __init__(self, client, movie_db, recommendation_engine):
@@ -784,8 +807,7 @@ class MovieRecommendationAgent:
 
     def _extract_preferences(self, message: str, current_prefs: Dict) -> Dict:
         """Extract preferences from user message using LLM with simplified structure"""
-        prompt = f"""You are a movie preference analyzer. Your task is to extract specific movie-related information from user input and organize it into primary fields and a specific query.
-
+        prompt = f""""You are a movie preference analyzer. Your task is to extract specific movie-related information from user input and organize it into primary fields and a specific query.
 ## Primary Extraction Fields:
 
 ### 1. Genres
@@ -826,7 +848,7 @@ Return only valid JSON in this exact format:
   "directors": [],
   "release_year": [],
   "query": ""
-}}"""
+}}""""
 
         try:
             response = self._call_llm(prompt)
@@ -1475,6 +1497,68 @@ with gr.Blocks(css=custom_css, title="🎬 Movie Recommendation Bot") as demo:
         outputs=[chatbot]
     )
 
+# --- Flask backend (testing) ---
+app = Flask(__name__)
+CORS(app, resources={r"/*": {"origins": os.getenv("CORS_ORIGINS", "*").split(",")}})
+
+@app.get("/health")
+def health():
+    return jsonify({"ok": True})
+
+@app.post("/chat")
+def chat_route():
+    """
+    Request JSON:
+      {
+        "message": "Recommend a sci-fi like Interstellar",
+        "state": { ... }   # optional: previous MovieChatState dict
+      }
+    Response JSON:
+      {
+        "reply": "...",
+        "state": { ... }   # updated MovieChatState dict
+      }
+    """
+    data = request.get_json(force=True) or {}
+    message = data.get("message", "")
+    state_dict = data.get("state")
+
+    reply, new_state = movie_agent.chat(message, state_from_dict(state_dict))
+    return jsonify({"reply": reply, "state": state_to_dict(new_state)})
+
+@app.get("/movies/search")
+def movies_search():
+    """
+    Simple local search over your 'movies' DataFrame by title.
+    You can swap to TMDb later if you prefer.
+    """
+    q = (request.args.get("q") or "").strip().lower()
+    if not q:
+        return jsonify([])
+
+    df = movies
+    # Adjust column names if yours differ (e.g., "title", "id", "overview", "vote_average", "release_date")
+    try:
+        results = (
+            df[df["title"].str.lower().str.contains(q, na=False)][
+                ["title", "id", "overview", "vote_average", "release_date"]
+            ]
+            .head(5)
+            .to_dict(orient="records")
+        )
+    except Exception:
+        # Fallback if any of the columns are missing: just return titles
+        results = (
+            df[df["title"].str.lower().str.contains(q, na=False)]["title"]
+            .head(5)
+            .to_list()
+        )
+    return jsonify(results)
 
 if __name__ == "__main__":
-    demo.launch()
+    if RUN_FLASK:
+        port = int(os.getenv("PORT", "8000"))
+        app.run(host="0.0.0.0", port=port)
+    else:
+        # Existing Gradio launch (unchanged)
+        demo.launch()
