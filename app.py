@@ -1,5 +1,5 @@
 import gradio as gr
-import spaces
+#import spaces
 from typing import Dict, List, Any, Optional,Tuple, Union
 from typing_extensions import TypedDict
 from langchain_community.vectorstores import FAISS
@@ -13,7 +13,7 @@ import os
 import ast
 import re
 from flask import Flask, request, jsonify
-from flask_cors import Cors
+from flask_cors import CORS
 
 RUN_FLASK = os.getenv("RUN_FLASK", "0") == "1"  # set RUN_FLASK=1 to use Flask instead of Gradio
 
@@ -24,7 +24,7 @@ client=OpenAI()
 
 #data
 embeddings = HuggingFaceEmbeddings(model_name="sentence-transformers/all-MiniLM-L6-v2",    
-                                   model_kwargs={'device': 'cuda'},    
+                                   model_kwargs={'device': 'cpu'},    
                                    encode_kwargs={'normalize_embeddings': True})
 vectorstore=FAISS.load_local("faiss_index",embeddings,allow_dangerous_deserialization=True)
 movies=pd.read_csv('movies.csv')
@@ -807,7 +807,7 @@ class MovieRecommendationAgent:
 
     def _extract_preferences(self, message: str, current_prefs: Dict) -> Dict:
         """Extract preferences from user message using LLM with simplified structure"""
-        prompt = f""""You are a movie preference analyzer. Your task is to extract specific movie-related information from user input and organize it into primary fields and a specific query.
+        prompt = f"""You are a movie preference analyzer. Your task is to extract specific movie-related information from user input and organize it into primary fields and a specific query.
 ## Primary Extraction Fields:
 
 ### 1. Genres
@@ -848,7 +848,7 @@ Return only valid JSON in this exact format:
   "directors": [],
   "release_year": [],
   "query": ""
-}}""""
+}}"""
 
         try:
             response = self._call_llm(prompt)
@@ -1562,3 +1562,15 @@ if __name__ == "__main__":
     else:
         # Existing Gradio launch (unchanged)
         demo.launch()
+
+#testing
+# Health
+#curl http://localhost:8000/health
+
+# Chat
+#curl -X POST http://localhost:8000/chat \
+ # -H "Content-Type: application/json" \
+  #-d '{"message":"Recommend a sci-fi like Interstellar"}'
+
+# Movie search
+#curl "http://localhost:8000/movies/search?q=blade"
